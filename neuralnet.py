@@ -71,15 +71,17 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.fc1 = nn.Linear(inputSize, args.nhidden)
+        self.bn1 = nn.BatchNorm1d(args.nhidden)
         self.linears = nn.ModuleList([nn.Linear(args.nhidden, args.nhidden) for i in range(args.layers)])
+        self.batchnorms = nn.ModuleList([nn.BatchNorm1d(args.nhidden) for i in range(args.layers)])
         self.fc2 = nn.Linear(args.nhidden, 2)
         self.dropout = nn.Dropout(args.dropout)
 
     def forward(self, input):
-        input = F.relu(self.fc1(input))
+        input = F.relu(self.bn1(self.fc1(input)))
         input = self.dropout(input)
         for i, fc in enumerate(self.linears):
-            input = self.dropout(F.relu(fc(input)))
+            input = self.dropout(F.relu(self.batchnorms[i](fc(input))))
         input = self.fc2(input)
         return input
 
@@ -109,7 +111,7 @@ def train(trainloader, epoch):
     for i, (data, target) in enumerate(trainloader, 0):
         input.data.resize_(data.size()).copy_(data)
         if args.noise > 0:
-            noise = torch.FloatTensor(data.size()).norm_(0, args.noise)
+            noise = torch.FloatTensor(data.size()).normal_(0, args.noise)
             if args.cuda:
                 noise = noise.cuda()
             input.data.add_(noise)
@@ -172,5 +174,6 @@ for epoch in range(1, args.epochs + 1):
     val_loss = test(valloader, epoch, True)
     if val_loss > val_loss_stored:
         args.lr /= 2
+        print('|||lr change||| %.4f' % (args.lr))
     val_loss_stored = val_loss
 test(testloader, epoch, False)
