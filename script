@@ -20,3 +20,5 @@ module load scikit-learn/intel/0.18.1
 
 pip install http://download.pytorch.org/whl/cu80/torch-0.1.11.post5-cp27-none-linux_x86_64.whl --user
 pip install torchvision --user
+
+python neuralnet.py --cuda

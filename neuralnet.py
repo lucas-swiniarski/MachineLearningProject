@@ -108,6 +108,11 @@ def train(trainloader, epoch):
 
     for i, (data, target) in enumerate(trainloader, 0):
         input.data.resize_(data.size()).copy_(data)
+        if args.noise > 0:
+            noise = torch.FloatTensor(data.size()).norm_(0, args.noise)
+            if args.cuda:
+                noise = noise.cuda()
+            input.data.add_(noise)
         label.data.resize_(target.size()).copy_(target)
         model.zero_grad()
         output = model(input)
@@ -131,9 +136,6 @@ def test(testloader, epoch, isVal):
 
     for i, (data, target) in enumerate(testloader, 0):
         input.data.resize_(data.size()).copy_(data)
-        if args.noise > 0:
-            # TODO@Lucas might also add noise at each layer of neural net.
-            input.data.add_(torch.FloatTensor(data.size()).normal_(0, args.noise))
         label.data.resize_(target.size()).copy_(target)
         output = model(input)
         test_loss += criterion(output, label)
