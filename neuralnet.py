@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
 import pickle as pkl
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
 import itertools
 from sklearn import metrics
 import datetime
@@ -65,9 +63,9 @@ def loaderize(data_X, data_Y, balance):
 # Load Data in tensors
 ###
 
-trainloader = loaderize(pkl.load(open(args.dataroot+'train_X.pkl','rb')), pkl.load(open(args.dataroot+'train_y.pkl','rb')).values, True)
-valloader = loaderize(pkl.load(open(args.dataroot+'val_X.pkl','rb')), pkl.load(open(args.dataroot+'val_y.pkl','rb')).values, False)
-testloader = loaderize(pkl.load(open(args.dataroot+'test_X.pkl','rb')), pkl.load(open(args.dataroot+'test_y.pkl','rb')).values, False)
+trainloader = loaderize(np.load(args.dataroot+'train_X.pkl'), np.load(args.dataroot+'train_y.pkl').values, True)
+valloader = loaderize(np.load(args.dataroot+'val_X.pkl'), np.load(args.dataroot+'val_y.pkl','rb').values, False)
+testloader = loaderize(np.load(args.dataroot+'test_X.pkl'), np.load(args.dataroot+'test_y.pkl').values, False)
 
 class Net(nn.Module):
     def __init__(self):
