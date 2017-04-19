@@ -39,9 +39,11 @@ parser.add_argument('--cuda'  , action='store_true', help='enables cuda')
 parser.add_argument('--epochs', type=int, default=25, help='number of epochs to train for')
 parser.add_argument('--lr', type=float, default=0.0002, help='learning rate, default=0.0002')
 parser.add_argument('--adam', action='store_true', help='Default RMSprop optimizer, wether to use Adam instead')
+parser.add_argument('--weights', action='store_true', help='Weighted Cross Entropy')
 parser.add_argument('--dropout', type=float, default=.5, help='Dropouts on discriminator')
 parser.add_argument('--noise', type=float, default=.1, help='Add gaussian noise to real data')
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
+parser.add_argument('--balance', action='store_true', help='Balance Training set by sampling more minority class')
 args = parser.parse_args()
 
 inputSize = 217
@@ -63,7 +65,7 @@ def loaderize(data_X, data_Y, balance):
 # Load Data in tensors
 ###
 
-trainloader = loaderize(np.load(args.dataroot+'train_X.pkl.npy'), np.load(args.dataroot+'train_y.pkl.npy'), True)
+trainloader = loaderize(np.load(args.dataroot+'train_X.pkl.npy'), np.load(args.dataroot+'train_y.pkl.npy'), args.balance)
 valloader = loaderize(np.load(args.dataroot+'val_X.pkl.npy'), np.load(args.dataroot+'val_y.pkl.npy'), False)
 testloader = loaderize(np.load(args.dataroot+'test_X.pkl.npy'), np.load(args.dataroot+'test_y.pkl.npy'), False)
 
@@ -94,7 +96,10 @@ else:
 
 input = torch.FloatTensor(args.batchSize, inputSize)
 label = torch.LongTensor(args.batchSize)
-criterion = nn.CrossEntropyLoss()
+if args.weights:
+    criterion = nn.CrossEntropyLoss(weight=torch.FloatTensor([1./.8, 1./.2]))
+else:
+    criterion = nn.CrossEntropyLoss()
 
 input = Variable(input)
 label = Variable(label)
