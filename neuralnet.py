@@ -65,9 +65,9 @@ def loaderize(data_X, data_Y, balance):
 # Load Data in tensors
 ###
 
-trainloader = loaderize(np.load(args.dataroot+'train_X.pkl.npy'), np.load(args.dataroot+'train_y.pkl.npy'), args.balance)
-valloader = loaderize(np.load(args.dataroot+'val_X.pkl.npy'), np.load(args.dataroot+'val_y.pkl.npy'), False)
-testloader = loaderize(np.load(args.dataroot+'test_X.pkl.npy'), np.load(args.dataroot+'test_y.pkl.npy'), False)
+trainloader = loaderize(np.load(args.dataroot+'train_X.npy'), np.load(args.dataroot+'train_y.npy'), args.balance)
+valloader = loaderize(np.load(args.dataroot+'val_X.npy'), np.load(args.dataroot+'val_y.npy'), False)
+testloader = loaderize(np.load(args.dataroot+'test_X.npy'), np.load(args.dataroot+'test_y.npy'), False)
 
 class Net(nn.Module):
     def __init__(self):

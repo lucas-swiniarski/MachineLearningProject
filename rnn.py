@@ -69,9 +69,9 @@ def loaderize(data_X, data_Y, balance, batch_size):
 # Load Data in tensors
 ###
 
-trainloader = loaderize(np.load(args.dataroot+'train_X.pkl.npy'), np.load(args.dataroot+'train_y.pkl.npy'), False, args.batchSize * args.bptt)
-valloader = loaderize(np.load(args.dataroot+'val_X.pkl.npy'), np.load(args.dataroot+'val_y.pkl.npy'), False, eval_batch_size * args.bptt)
-testloader = loaderize(np.load(args.dataroot+'test_X.pkl.npy'), np.load(args.dataroot+'test_y.pkl.npy'), False, eval_batch_size * args.bptt)
+trainloader = loaderize(np.load(args.dataroot+'train_X.npy'), np.load(args.dataroot+'train_y.npy'), False, args.batchSize * args.bptt)
+valloader = loaderize(np.load(args.dataroot+'val_X.npy'), np.load(args.dataroot+'val_y.npy'), False, eval_batch_size * args.bptt)
+testloader = loaderize(np.load(args.dataroot+'test_X.npy'), np.load(args.dataroot+'test_y.npy'), False, eval_batch_size * args.bptt)
 
 class RNNModel(nn.Module):
     """Container module with an encoder, a recurrent module, and a decoder."""
