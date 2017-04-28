@@ -4,7 +4,6 @@ import pickle
 from scipy.spatial.distance import cdist
 import time
 import csv
-
 import math
 
 class OutOfRangeError(ValueError):
@@ -199,8 +198,12 @@ def zone_number_to_central_longitude(zone_number):
     return (zone_number - 1) * 6 - 180 + 3
 
 def get_utm(latitude, longitude):
-    utm1, utm2 = from_latlon(latitude, longitude)
-    return (utm1, utm2)
+    if math.isnan(latitude) or math.isnan(longitude):
+        return (np.nan, np.nan)
+
+    else:
+        utm1, utm2 = from_latlon(latitude, longitude)
+        return (utm1, utm2)
 
 #path = "../../../Google Drive/Data_science/NYU/Machine Learning/ML Project (Collisions)/" #Joe
 path = "../../../../Google Drive/ML Project (Collisions)/" # Joyce
@@ -210,8 +213,7 @@ path = "../../../../Google Drive/ML Project (Collisions)/" # Joyce
 df = pd.read_csv(path + "NYPD_Motor_Vehicle_Collisions.csv", parse_dates=[['DATE', 'TIME']], infer_datetime_format=True)
 df.LATITUDE = df.LATITUDE.astype(float)
 df.LONGITUDE = df.LONGITUDE.astype(float)
-df = df[df.LATITUDE.notnull()]
-df = df[df.LONGITUDE > -100]
+df.ix[df.LONGITUDE[df.LONGITUDE < -100].index,'LONGITUDE'] = np.nan
 df['LOCATION'] = [get_utm(x,y) for x,y in zip(df['LATITUDE'], df['LONGITUDE'])]
 
 #Read in the stations data
@@ -224,9 +226,14 @@ stations = stations[stations['station'] != 'KJRB']
 points = list(stations['LOCATION'])
 
 def closest_station(point):
-    """ Find closest point from a list of points. """
-    minpt = cdist([point], points).argmin()
-    return list(stations['station'])[minpt]
+    
+    if math.isnan(point[1]):
+        return 'KNYC'
+    
+    else:
+        """ Find closest point from a list of points. """
+        minpt = cdist([point], points).argmin()
+        return list(stations['station'])[minpt]
 
 df['station'] = [closest_station(x) for x in df.LOCATION]
 
@@ -280,7 +287,7 @@ df['precip'] = [str(i).strip(' in') for i in df.precip]
 
 df = df.drop(['events'], axis=1)
 
-with open('weather_joined_utm.pkl', 'wb') as output:
+with open(path+'data_for_joining/weather_joined_utm.pkl', 'wb') as output:
     pickle.dump(df, output, pickle.HIGHEST_PROTOCOL)
 
 

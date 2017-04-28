@@ -1,0 +1,59 @@
+import xgboost as xgb
+import pickle as pkl
+from sklearn import metrics
+
+path = "./" #Joe
+#path = "../../../../Google Drive/ML Project (Collisions)/" # Joyce
+# path = "" # Lucas
+
+def modelfit(alg, train_X, train_y, val_X=None, val_y=None, early_stopping_rounds=50):
+    val_check = (not val_X is None)
+
+    #print(alg.get_params)
+    # Fit the algorithm on the data
+    #print("Fitting model...")
+    alg.fit(train_X, train_y, eval_metric='auc')
+
+    # Predict training set:
+    #print("Predicting on train set...")
+    dtrain_predictions = alg.predict(train_X)
+    dtrain_predprob = alg.predict_proba(train_X)[:, 1]
+
+    # Predict val set:
+    if val_check:
+        #print("Predicting on val set...")
+        dval_predictions = alg.predict(val_X)
+        dval_predprob = alg.predict_proba(val_X)[:, 1]
+
+    # Print model report:
+    #print("\nModel Report")
+    #print("Accuracy : %.4g" % metrics.accuracy_score(train_y, dtrain_predictions))
+    print("AUC Score (Train): %f" % metrics.roc_auc_score(train_y, dtrain_predprob))
+
+    if val_check:
+        #print("\nAccuracy : %.4g" % metrics.accuracy_score(val_y, dval_predictions))
+        print("AUC Score (Val): %f" % metrics.roc_auc_score(val_y, dval_predprob))
+
+
+
+def main():
+    print("Loading Train Data")
+    train_X = pkl.load(open(path + 'normalized_1hot/train_X.pkl', 'rb'))
+    train_y = pkl.load(open(path + 'normalized_1hot/train_y.pkl', 'rb'))
+
+    print("Loading Val Data")
+
+    val_X = pkl.load(open(path + 'normalized_1hot/val_X.pkl', 'rb'))
+    val_y = pkl.load(open(path + 'normalized_1hot/val_y.pkl', 'rb'))
+
+    for learning_rate in [0.01, 0.05, 0.1, 0.2]:
+        for max_depth in [3,4,5,6]:
+            for n_estimators in [100]:
+                for reg_lambda in [1e-2,1,1e2]:
+                    print("Learning rate: {0}, Max Depth: {1}, Estimators: {2}, Reg_lambda: {3}".format(learning_rate, max_depth, n_estimators, reg_lambda))
+                    modelfit(xgb.XGBClassifier(base_score=train_y.mean(), seed=42, learning_rate=learning_rate,\
+                                                max_depth=max_depth, n_estimators=n_estimators, reg_lambda=reg_lambda,\
+                            ), train_X=train_X, train_y=train_y, val_X=val_X, val_y=val_y)
+
+if __name__ == "__main__":
+    main()
