@@ -1,17 +1,24 @@
 import subprocess
+import argparse
 
-for learning_rate in [0.01, 0.05,.1,.5,]:
-    for max_depth in [2,3,4]:
+parser = argparse.ArgumentParser(description='Distribute SBATCH')
+parser.add_argument("-d", "--directory", default='normalized_1hot', help="Which dataset")
+args = vars(parser.parse_args())
+directory = args['directory']
+
+
+for learning_rate in [.1]:
+    for max_depth in [4]:
         for n_estimators in [1000]:
-            for reg_lambda in [1,1e2,1e4]:
+            for reg_lambda in [1e2]:
 
                 slurm_text = """#!/bin/bash
 #
-#SBATCH --job-name=xgboost_{0}_{1}_{2}_{3}
-#SBATCH --time=3:00:00
+#SBATCH --job-name=xgboost_{4}_{0}_{1}_{2}_{3}
+#SBATCH --time=5:00:00
 #SBATCH --mem=12GB
-#SBATCH --output=jcv_infer_%A.out
-#SBATCH --error=jcv_infer_%A.err
+#SBATCH --output=jcv_{4}_xgboost_%A.out
+#SBATCH --error=jcv_{4}_xgboost_%A.err
 #SBATCH --mail-user=jcv312@nyu.edu
 
 # Log what we're running and where.
@@ -29,8 +36,8 @@ export PYTHONPATH=/scratch/jcv312/ML/xgboost/python-package
 
 cd /scratch/jcv312/ML/
 
-python3 -u train_xgboost.py -l {0} -m {1} -n {2} -r {3} > xgboost_{0}_{1}_{2}_{3}.log
-""".format(learning_rate, max_depth, n_estimators, reg_lambda)
+python3 -u train_val_xgboost.py -l {0} -m {1} -n {2} -r {3} -d {4}> xgboost_{4}_{0}_{1}_{2}_{3}.log
+""".format(learning_rate, max_depth, n_estimators, reg_lambda, directory)
 
                 text_file = open("play.slurm", "wb")
                 text_file.write("%s" % slurm_text)

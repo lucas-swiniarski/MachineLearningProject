@@ -35,7 +35,7 @@ def modelfit(alg, train_X, train_y, val_X=None, val_y=None, early_stopping_round
         #print("\nAccuracy : %.4g" % metrics.accuracy_score(val_y, dval_predictions))
         print("AUC Score (Val): %f" % metrics.roc_auc_score(val_y, dval_predprob))
 
-
+    return alg
 
 def main():
 
@@ -54,18 +54,18 @@ def main():
     directory = args['directory']
 
     #print("Loading Train Data")
-    train_X = pkl.load(open(path + directory + '/train_X.pkl', 'rb'))
-    train_y = pkl.load(open(path + directory + '/train_y.pkl', 'rb'))
+    train_X = pkl.load(open(path + directory + '/train_val_X.pkl', 'rb'))
+    train_y = pkl.load(open(path + directory + '/train_val_y.pkl', 'rb'))
 
     #print("Loading Val Data")
 
-    val_X = pkl.load(open(path + directory + '/val_X.pkl', 'rb'))
-    val_y = pkl.load(open(path + directory + '/val_y.pkl', 'rb'))
+    val_X = pkl.load(open(path + directory + '/test_X.pkl', 'rb'))
+    val_y = pkl.load(open(path + directory + '/test_y.pkl', 'rb'))
 
     print("Learning rate: {0}, Max Depth: {1}, Estimators: {2}, Reg_lambda: {3}".format(learning_rate, max_depth, n_estimators, reg_lambda))
-    modelfit(xgb.XGBClassifier(base_score=train_y.mean(), seed=42, learning_rate=learning_rate,\
+    model = modelfit(xgb.XGBClassifier(base_score=train_y.mean(), seed=42, learning_rate=learning_rate,\
                                 max_depth=max_depth, n_estimators=n_estimators, reg_lambda=reg_lambda,\
                                 ), train_X=train_X, train_y=train_y, val_X=val_X, val_y=val_y)
-
+    pkl.dump(model, open(path + directory + '/train_val_model.pkl','wb'))
 if __name__ == "__main__":
     main()
